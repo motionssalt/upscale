@@ -1,19 +1,23 @@
 name: Check model updates
 
-# Weekly check of upstream HuggingFace repos for newer versions of the anime
-# upscaling model weights this project mirrors. If newer files are found,
-# they are downloaded and published as a fresh GitHub Release so the Colab
-# notebook (which only ever downloads from this repo's Releases) picks them
-# up automatically.
+# Weekly check of upstream sources for newer versions of the anime upscaling
+# model weights this project mirrors. If newer files are found, they are
+# downloaded and published as a fresh GitHub Release so the Colab notebook
+# (which only ever downloads from this repo's Releases) picks them up
+# automatically.
 #
-# Safety properties:
-#   - HuggingFace unreachable                    -> exit 0, do nothing.
-#   - Upstream unchanged                         -> exit 0, do nothing.
-#   - Upstream newer                             -> new Release published.
-#   - Publish itself fails                       -> job fails loudly (red X).
+# Safety properties (consistent across ALL sources):
+#   - Source fails, previous mirror exists   -> carried forward, job stays
+#     green BUT a ::warning:: annotation + job-summary section makes the
+#     failure visible on the Actions tab without opening the raw log.
+#   - Source fails, NO previous mirror       -> job fails red (::error::).
+#   - Every source fails                     -> job fails red, no Release.
+#   - Upstream unchanged                     -> exit 0, do nothing.
+#   - Upstream newer                         -> new Release published.
+#   - Publish itself fails                   -> job fails loudly (red X).
 #
-# In every one of those cases the Colab notebook is unaffected as long as at
-# least one Release exists — that's the whole point of decoupling from HF.
+# In every non-red case the Colab notebook is unaffected as long as at least
+# one Release exists — that's the whole point of decoupling from upstream.
 
 on:
   schedule:
@@ -50,10 +54,14 @@ jobs:
       # the Python standard library, so the mirror pipeline has no external
       # runtime dependencies of its own.
 
-      - name: Check HuggingFace and mirror if newer
+      - name: Check upstream sources and mirror if newer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: only needed if a HuggingFace source is ever gated.
+          # Create an HF access token with read access and add it as a repo
+          # secret named HF_TOKEN. Unset/empty is fine for public repos.
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           FORCE_FLAG=""
           if [ "${{ github.event.inputs.force }}" = "true" ]; then

@@ -1,6 +1,6 @@
 # MOTIONSALT Upscaler
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR-USERNAME/motionsalt-upscaler/blob/main/MOTIONSALT_Upscaler.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/motionssalt/upscale/blob/main/MOTIONSALT_Upscaler.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Weights Auto-Mirror](https://github.com/YOUR-USERNAME/motionsalt-upscaler/actions/workflows/check-model-updates.yml/badge.svg)](.github/workflows/check-model-updates.yml)
 

@@ -6,7 +6,9 @@
 
 **A free, no-install anime video upscaler that runs entirely in your browser — a free alternative to Topaz Video AI for people without a PC or GPU.**
 
-MOTIONSALT Upscaler is a Google Colab notebook that upscales anime video 2× using open-source models (AnimeJaNai V3 and Real-ESRGAN AnimeVideo v3). You don't install anything, you don't need a graphics card, and you don't pay anything — the upscaling runs on Google's free servers.
+MOTIONSALT Upscaler is a Google Colab notebook that upscales anime video using open-source models (AnimeJaNai V3 and Real-ESRGAN AnimeVideo v3). You don't install anything, you don't need a graphics card, and you don't pay anything — the upscaling runs on Google's free servers.
+
+The native upscale factor depends on the quality tier you pick — the two AnimeJaNai V3 tiers are 2× models, and the Real-ESRGAN AnimeVideo v3 tier is a 4× model. The factor is read straight off the loaded model at runtime (never hardcoded), and the optional 1080p-height finish step lets you land any of them at a consistent output height.
 
 ---
 
@@ -43,11 +45,13 @@ That's it. You never touch code. You never install anything on your computer.
 
 | Tier | Model | Best for |
 |------|-------|----------|
-| **LOW** | AnimeJaNai V3 SuperUltraCompact 2× | Fastest. Modern digital anime with already-clean lines. |
-| **MEDIUM** | AnimeJaNai V3 UltraCompact 2× | Balanced. Good general default. |
-| **HIGH** | Real-ESRGAN AnimeVideo v3 2× | Highest quality. Older / noisier / compressed sources. Slowest. |
+| Tier | Model | Native scale | Best for |
+|------|-------|--------------|----------|
+| **LOW** | AnimeJaNai V3 SuperUltraCompact | **2×** | Fastest. Modern digital anime with already-clean lines. |
+| **MEDIUM** | AnimeJaNai V3 UltraCompact | **2×** | Balanced. Good general default. |
+| **HIGH** | Real-ESRGAN AnimeVideo v3 | **4×** | Highest quality. Older / noisier / compressed sources. Slowest. |
 
-All three are pure 2× upscalers. If you feed in 720p, you get 1440p out. If you then tick "Downscale to 1080p", the final file is resized so the **height** is 1080 — the aspect ratio of your source is preserved (a 1440×1080 4:3 source stays 4:3, a 1920×1080 16:9 source becomes 1920×1080, an ultrawide stays ultrawide).
+The scale factor comes straight from the model file's own metadata at load time — the notebook does not assume any fixed factor. If you feed a 540p source into the HIGH tier you get 2160p (4K) out; feed the same 540p source into MEDIUM and you get 1080p. If you then tick "Downscale to 1080p", the final file is resized so the **height** is 1080 — the aspect ratio of your source is preserved (a 1440×1080 4:3 source stays 4:3, a 1920×1080 16:9 source becomes 1920×1080, an ultrawide stays ultrawide). This makes the 1080p checkbox a useful "normalise the final height" knob regardless of which tier produced the intermediate frames.
 
 ---
 
@@ -60,7 +64,7 @@ Google Colab is generous but it isn't unlimited:
 - **RAM/disk:** A free-tier VM has limited disk. If your source video is very long (say, more than 20–30 minutes at HD), consider splitting it before uploading.
 - **Idle disconnect:** Colab disconnects if it thinks you've walked away. Keep the tab visible while processing.
 
-If a session dies mid-process, you just re-open the notebook and start again — nothing on your own machine is affected.
+If a session dies mid-process, you just re-open the notebook and start again — nothing on your own machine is affected. Checkpoint/resume of a partially-processed clip is **not** supported in V1: a broken pipe to ffmpeg mid-stream cannot be resumed frame-exactly against a raw-video pipe without re-encoding the head of the file, and the free-tier VM is discarded on disconnect anyway. If your source is long, split it locally first.
 
 ---
 
@@ -79,7 +83,7 @@ The upshot: if HuggingFace ever goes down, reorganizes its repos, or rate-limits
 This project is a wrapper. The actual upscaling intelligence comes from other people's excellent open-source work, and this project would not exist without it.
 
 - **[AnimeJaNai V3](https://github.com/the-database/mpv-upscale-2x_animejanai)** — by *the-database* and the AnimeJaNai contributors. The SuperUltraCompact and UltraCompact 2× models used in the LOW and MEDIUM tiers.
-- **[Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)** — by *Xintao Wang* et al. (Tencent ARC Lab). The `realesr-animevideov3` 2× model used in the HIGH tier.
+- **[Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)** — by *Xintao Wang* et al. (Tencent ARC Lab). The `realesr-animevideov3` 4× model used in the HIGH tier.
 - **[FFmpeg](https://ffmpeg.org/)** — for frame extraction, audio muxing, and final encode.
 - **[PyTorch](https://pytorch.org/)** — inference runtime.
 
